@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskFlow — Project Management</title>
+  <meta name="description" content="TaskFlow — Dashboard de gestión de proyectos. Demo SaaS." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════
+     AUTH VIEW
+════════════════════════════════════════════════════ -->
+<div id="auth-view">
+  <div class="auth-grid">
+
+    <!-- Branding lateral -->
+    <div class="auth-brand">
+      <div class="auth-brand-logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+          </svg>
+        </div>
+        <span class="logo-name">TaskFlow</span>
+      </div>
+      <h1>Gestioná tus<br>proyectos con <span>claridad.</span></h1>
+      <p>Una plataforma SaaS moderna para equipos que quieren enfocarse en lo que importa: entregar resultados.</p>
+      <div class="auth-features">
+        <div class="auth-feature"><div class="auth-feature-dot"></div> CRUD completo de proyectos</div>
+        <div class="auth-feature"><div class="auth-feature-dot"></div> Sesión persistente con localStorage</div>
+        <div class="auth-feature"><div class="auth-feature-dot"></div> Filtros, búsqueda y estados</div>
+        <div class="auth-feature"><div class="auth-feature-dot"></div> 100% frontend — compatible con GitHub Pages</div>
+      </div>
+    </div>
+
+    <!-- Auth Card -->
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Iniciar sesión</button>
+        <button class="auth-tab" data-tab="register">Registrarse</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="form-login" class="auth-form-panel">
+        <div class="alert" id="loginAlert"></div>
+        <form id="loginForm" autocomplete="on">
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" placeholder="tu@email.com" required autocomplete="email" />
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Contraseña</label>
+            <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password" />
+          </div>
+          <div class="mt-2">
+            <button type="submit" id="loginBtn" class="btn btn-primary btn-full btn-lg">
+              Iniciar sesión
+            </button>
+          </div>
+        </form>
+        <div class="auth-divider">ó</div>
+        <div class="auth-footer-link">
+          ¿No tenés cuenta? <a href="#" onclick="document.querySelector('[data-tab=register]').click();return false;">Registrate gratis</a>
+        </div>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="form-register" class="auth-form-panel hidden">
+        <div class="alert" id="registerAlert"></div>
+        <form id="registerForm" autocomplete="off">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="regFirstName">Nombre</label>
+              <input type="text" id="regFirstName" placeholder="Juan" required />
+            </div>
+            <div class="form-group">
+              <label for="regLastName">Apellido</label>
+              <input type="text" id="regLastName" placeholder="García" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="regEmail">Email</label>
+            <input type="email" id="regEmail" placeholder="tu@email.com" required />
+          </div>
+          <div class="form-group">
+            <label for="regPassword">Contraseña</label>
+            <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres" required />
+          </div>
+          <div class="form-group">
+            <label for="regPassword2">Confirmar contraseña</label>
+            <input type="password" id="regPassword2" placeholder="Repetí la contraseña" required />
+          </div>
+          <div class="mt-2">
+            <button type="submit" id="registerBtn" class="btn btn-primary btn-full btn-lg">
+              Crear cuenta gratis
+            </button>
+          </div>
+          <p class="text-muted mt-1" style="text-align:center;">Al registrarte aceptás los términos de uso.</p>
+        </form>
+      </div>
+
+    </div><!-- /auth-card -->
+  </div><!-- /auth-grid -->
+</div><!-- /auth-view -->
+
+
+<!-- ════════════════════════════════════════════════════
+     APP VIEW — Dashboard
+════════════════════════════════════════════════════ -->
+<div id="app-view" class="hidden">
+
+  <!-- Sidebar backdrop (mobile) -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- ─── SIDEBAR ─── -->
+  <aside class="sidebar">
+
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+          </svg>
+        </div>
+        <span class="logo-name">TaskFlow</span>
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebarUserAvatar">--</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarUserName">Usuario</div>
+        <div class="user-role" id="sidebarUserRole">Free Plan</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+
+      <div class="nav-item active" data-view="dashboard">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"/><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"/></svg>
+        Dashboard
+      </div>
+
+      <div class="nav-item" data-view="projects">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/></svg>
+        Proyectos
+        <span class="nav-badge" id="navProjectsBadge">0</span>
+      </div>
+
+      <div class="nav-section-label" style="margin-top:0.5rem">Cuenta</div>
+
+      <div class="nav-item" data-view="profile">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+        Mi Perfil
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="nav-item" id="logoutBtn" style="color:var(--danger)">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>
+        Cerrar sesión
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ─── MAIN WRAPPER ─── -->
+  <div class="main-wrapper">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle btn btn-ghost btn-icon" id="sidebarToggle" aria-label="Menú">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+        </button>
+        <span class="topbar-title" id="topbarTitle">Dashboard</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-search">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
+          <input type="text" id="topbarSearch" placeholder="Buscar proyectos..." />
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="window.openCreateProject()">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="13" height="13"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+          Nuevo Proyecto
+        </button>
+      </div>
+    </header>
+
+    <!-- ─── MAIN CONTENT ─── -->
+    <main class="main-content">
+
+      <!-- ═══ VIEW: DASHBOARD ═══ -->
+      <div class="view-panel active" id="view-dashboard">
+
+        <div class="page-header">
+          <div class="page-header-text">
+            <h2 id="dashWelcome">Bienvenido 👋</h2>
+            <p>Resumen de tus proyectos activos.</p>
+          </div>
+          <button class="btn btn-primary" onclick="window.openCreateProject()">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+            Nuevo Proyecto
+          </button>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-label">Total Proyectos</span>
+              <div class="stat-card-icon si-blue">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" id="stat-total">0</div>
+            <div class="stat-card-delta">en tu cuenta</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-label">Activos</span>
+              <div class="stat-card-icon si-green">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" id="stat-active">0</div>
+            <div class="stat-card-delta">en ejecución</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-label">Completados</span>
+              <div class="stat-card-icon si-accent">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" id="stat-completed">0</div>
+            <div class="stat-card-delta">finalizados</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-label">Progreso promedio</span>
+              <div class="stat-card-icon si-amber">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" id="stat-progress">0%</div>
+            <div class="stat-card-delta">entre todos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-label">Presupuesto total</span>
+              <div class="stat-card-icon si-green">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" style="font-size:1.2rem" id="stat-budget">$0</div>
+            <div class="stat-card-delta">suma de proyectos</div>
+          </div>
+        </div>
+
+        <div class="widgets-grid">
+          <div class="widget">
+            <div class="widget-header">
+              <span class="widget-title">Actividad reciente</span>
+              <a class="widget-action" onclick="document.querySelector('[data-view=projects]').click()">Ver todos →</a>
+            </div>
+            <div class="activity-list" id="activityList">
+              <div class="activity-item"><div class="activity-text" style="color:var(--text3)">Sin actividad.</div></div>
+            </div>
+          </div>
+          <div class="widget">
+            <div class="widget-header">
+              <span class="widget-title">Acciones rápidas</span>
+            </div>
+            <div class="quick-actions">
+              <button class="quick-action-btn" id="qaNewProject">
+                <div class="qa-icon si-accent">
+                  <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+                </div>
+                Nuevo proyecto
+              </button>
+              <button class="quick-action-btn" id="qaViewAll">
+                <div class="qa-icon si-blue">
+                  <svg viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/></svg>
+                </div>
+                Ver proyectos
+              </button>
+              <button class="quick-action-btn" id="qaProfile">
+                <div class="qa-icon si-amber">
+                  <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+                </div>
+                Mi perfil
+              </button>
+              <button class="quick-action-btn" onclick="document.getElementById('logoutBtn').click()">
+                <div class="qa-icon si-red">
+                  <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>
+                </div>
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /view-dashboard -->
+
+
+      <!-- ═══ VIEW: PROYECTOS ═══ -->
+      <div class="view-panel" id="view-projects">
+
+        <div class="page-header">
+          <div class="page-header-text">
+            <h2>Proyectos</h2>
+            <p>Gestioná todos tus proyectos desde acá.</p>
+          </div>
+          <button class="btn btn-primary" onclick="window.openCreateProject()">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+            Nuevo Proyecto
+          </button>
+        </div>
+
+        <div class="table-container">
+          <div class="table-toolbar">
+            <div class="table-toolbar-left">
+              <div class="table-search">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
+                <input type="text" id="projectSearch" placeholder="Buscar por nombre o cliente..." />
+              </div>
+              <select class="filter-select" id="statusFilter">
+                <option value="all">Todos los estados</option>
+                <option value="active">Activo</option>
+                <option value="pending">Pendiente</option>
+                <option value="paused">Pausado</option>
+                <option value="completed">Completado</option>
+              </select>
+              <select class="filter-select" id="priorityFilter">
+                <option value="all">Todas las prioridades</option>
+                <option value="high">Alta</option>
+                <option value="medium">Media</option>
+                <option value="low">Baja</option>
+              </select>
+            </div>
+            <span class="text-muted" id="projectsCount">0 proyectos</span>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Proyecto</th>
+                  <th>Cliente</th>
+                  <th>Estado</th>
+                  <th>Prioridad</th>
+                  <th>Progreso</th>
+                  <th>Deadline</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="projectsTbody">
+                <tr><td colspan="7" class="table-empty">
+                  <span class="table-empty-icon">📂</span>
+                  <p>Cargando proyectos...</p>
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <span id="tableFooterInfo">Proyectos cargados desde localStorage</span>
+            <span style="color:var(--accent);font-size:0.72rem;">💾 Auto-guardado</span>
+          </div>
+        </div>
+
+      </div><!-- /view-projects -->
+
+
+      <!-- ═══ VIEW: PERFIL ═══ -->
+      <div class="view-panel" id="view-profile">
+
+        <div class="page-header">
+          <div class="page-header-text">
+            <h2>Mi Perfil</h2>
+            <p>Gestioná tu información personal y seguridad.</p>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.25rem; max-width:900px;">
+
+          <!-- Datos personales -->
+          <div class="profile-card">
+            <div class="profile-header">
+              <div class="profile-avatar" id="profileAvatar">--</div>
+              <div class="profile-meta">
+                <h3 id="profileFullName">Usuario</h3>
+                <p id="profileEmailDisplay">email</p>
+              </div>
+            </div>
+
+            <div class="alert" id="profileAlert"></div>
+            <form id="profileForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="profileFirstName">Nombre</label>
+                  <input type="text" id="profileFirstName" required />
+                </div>
+                <div class="form-group">
+                  <label for="profileLastName">Apellido</label>
+                  <input type="text" id="profileLastName" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="profileEmail">Email</label>
+                <input type="email" id="profileEmail" disabled style="opacity:0.5;cursor:not-allowed" />
+                <span class="text-muted mt-1">El email no se puede cambiar.</span>
+              </div>
+              <div class="mt-2">
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Cambiar contraseña -->
+          <div class="profile-card">
+            <h3 style="font-size:0.95rem;font-weight:700;color:var(--text);margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)">Cambiar contraseña</h3>
+            <div class="alert" id="passwordAlert"></div>
+            <form id="passwordForm">
+              <div class="form-group">
+                <label for="currentPassword">Contraseña actual</label>
+                <input type="password" id="currentPassword" placeholder="••••••••" required />
+              </div>
+              <div class="form-group">
+                <label for="newPassword">Nueva contraseña</label>
+                <input type="password" id="newPassword" placeholder="Mínimo 6 caracteres" required />
+              </div>
+              <div class="form-group">
+                <label for="newPassword2">Confirmar nueva contraseña</label>
+                <input type="password" id="newPassword2" placeholder="Repetí la nueva contraseña" required />
+              </div>
+              <div class="mt-2">
+                <button type="submit" class="btn btn-primary">Actualizar contraseña</button>
+              </div>
+            </form>
+          </div>
+
+        </div>
+
+        <!-- Datos de sesión -->
+        <div class="profile-card" style="max-width:900px;margin-top:1.25rem;">
+          <h3 style="font-size:0.88rem;font-weight:700;color:var(--text);margin-bottom:1.25rem;">Información de sesión</h3>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;">
+            <div>
+              <div class="text-muted">Estado</div>
+              <span class="badge badge-active" style="margin-top:4px">Activa</span>
+            </div>
+            <div>
+              <div class="text-muted">Almacenamiento</div>
+              <div style="font-size:0.85rem;color:var(--text2);margin-top:4px">localStorage (navegador)</div>
+            </div>
+            <div>
+              <div class="text-muted">Expiración</div>
+              <div style="font-size:0.85rem;color:var(--text2);margin-top:4px">7 días desde el login</div>
+            </div>
+            <div>
+              <div class="text-muted">Plan actual</div>
+              <span class="badge badge-pending" style="margin-top:4px">Free</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /view-profile -->
+
+    </main>
+  </div><!-- /main-wrapper -->
+
+</div><!-- /app-view -->
+
+
+<!-- ════════════════════════════════════════════════════
+     MODAL — Proyecto (Crear / Editar)
+════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="projectModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="projectModalTitle">Nuevo Proyecto</h3>
+      <button class="modal-close" data-close-modal>✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert" id="projectModalAlert"></div>
+      <form id="projectForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pmName">Nombre del proyecto *</label>
+            <input type="text" id="pmName" placeholder="Ej: App de delivery" required />
+          </div>
+          <div class="form-group">
+            <label for="pmClient">Cliente *</label>
+            <input type="text" id="pmClient" placeholder="Ej: Acme Corp" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pmStatus">Estado</label>
+            <select id="pmStatus">
+              <option value="active">Activo</option>
+              <option value="pending">Pendiente</option>
+              <option value="paused">Pausado</option>
+              <option value="completed">Completado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="pmPriority">Prioridad</label>
+            <select id="pmPriority">
+              <option value="high">Alta</option>
+              <option value="medium" selected>Media</option>
+              <option value="low">Baja</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pmBudget">Presupuesto ($)</label>
+            <input type="number" id="pmBudget" placeholder="0" min="0" step="100" />
+          </div>
+          <div class="form-group">
+            <label for="pmDeadline">Fecha límite</label>
+            <input type="date" id="pmDeadline" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="pmProgress">Progreso: <span id="pmProgressVal">0%</span></label>
+          <input type="range" id="pmProgress" min="0" max="100" value="0" style="width:100%;accent-color:var(--accent)" />
+        </div>
+        <div class="form-group">
+          <label for="pmDescription">Descripción</label>
+          <textarea id="pmDescription" rows="3" placeholder="Breve descripción del proyecto..."></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-modal>Cancelar</button>
+      <button class="btn btn-primary" onclick="document.getElementById('projectForm').requestSubmit()">
+        <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+        Guardar
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- SCRIPTS (orden importa: auth primero, luego app) -->
+<script src="auth.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
